@@ -1,4 +1,13 @@
 #include "BoardDefs.h"
+#include "wiring.h"
+#include "ets_sys.h"
+#include "gpio.h"
+#include "eagle_soc.h"
+#include "osapi.h"
+
+extern void ets_isr_attach(int intr, void *handler, void *arg);
+extern void ets_isr_mask(unsigned intr);
+extern void ets_isr_unmask(unsigned intr);
 
 static int port_a[] = {PA0,PA1,PA2,PA3,PA4,PA5,PA6,PA7};
 static int port_b[] = {PB0,PB1,PB2,PB3,PB4,PB5,PB6,PB7};
@@ -14,10 +23,10 @@ void noPullup(int inpin)
 	PIN_PULLUP_DIS(inpin);
 }
 
-void pinMode(int pin, int is_input)
+void pinMode(int pin, int is_output)
 {
 	// Set GPIO12 as input, then gpio_output_set (0, 0, 0, BIT12).
-	if(value == INPUT)
+	if(is_output == INPUT)
 	{
 		GPIO_DIS_OUTPUT(pin);
 	}
@@ -36,7 +45,7 @@ int digitalRead(int pin)
 	return GPIO_INPUT_GET(pin);
 }
 
-int* getPortPins(port)
+int* getPortPins(int port)
 {
 	int * port_pins;
 	if(port == PORTA)
@@ -52,13 +61,14 @@ int* getPortPins(port)
 		return 0x0;
 	}
 }
-void portMode(int port,int is_output);
+
+int portMode(int port,int is_output)
 {
 	int * port_pins = getPortPins(port);
 	int lcv;
 
 	if(port_pins == 0)
-		return;
+		return INVALID_PORT;
 
 	for(lcv=0;lcv<8;lcv++)
 	{
@@ -72,7 +82,7 @@ int portRead(int port)
 	int result = 0;
 	int lcv = 0;
 	if(port_pins == 0)
-		return 0;	
+		return INVALID_PORT;	
 	for(lcv=0;lcv<8;lcv++)
 	{
 		result |= digitalRead(port_pins[lcv]) << lcv;
@@ -80,14 +90,14 @@ int portRead(int port)
 	return result;
 }
 
-void portWrite(int port, int byte)
+int portWrite(int port, int byte)
 {
 	int * port_pins = getPortPins(port);;
 	int result = 0;
 	int lcv = 0;
 
 	if(port_pins == 0)
-		return 0;
+		return INVALID_PORT;
 
 	for(lcv=0;lcv<8;lcv++)
 	{
@@ -98,7 +108,8 @@ void portWrite(int port, int byte)
 
 
 
-INT_FUNC interrupt_functions[16] = {0};
+INT_FUNC interrupt_functions[16] ={0};
+
 void interrupt_handler(int8_t key)
 {
 	int pin = 0;
@@ -127,7 +138,7 @@ void interrupt_handler(int8_t key)
 
 
 }
-int interruptMode(uint8_t interrupt,int mode)
+int interruptMode(unsigned char interrupt,int mode)
 {
 	int pin_number = interrupt;
 	int int_mode = GPIO_PIN_INTR_DISABLE;
@@ -160,7 +171,7 @@ int interruptMode(uint8_t interrupt,int mode)
 	gpio_pin_intr_state_set(GPIO_ID_PIN(pin_number), int_mode);
 	return 0;
 }
-void attachInterrupt(uint8_t interrupt, INT_FUNC function , int mode)
+int attachInterrupt(unsigned char interrupt, INT_FUNC function , int mode)
 {	
 	int pin_number = interrupt;
 	int status = 0;
@@ -192,7 +203,7 @@ void attachInterrupt(uint8_t interrupt, INT_FUNC function , int mode)
     ETS_GPIO_INTR_ENABLE();
 }
 
-void detachInterrupt(uint8_t interrupt)
+int detachInterrupt(unsigned char interrupt)
 {
 	int pin = interrupt;
 	//interrupt_functions[pin] = 0x0;

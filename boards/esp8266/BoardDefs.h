@@ -1,8 +1,9 @@
 #ifndef WBOARDDEFS_H
 #define WBOARDDEFS_H
 
-#include <stdint.h>
-#include "eagle_soc.h"
+
+
+
 // #define TOTAL_PINS 10
 // #define TOTAL_ANALOG_PINS 2
 // #define FIRST_ANALOG_PIN 24
@@ -23,22 +24,7 @@
 // PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO2_U, FUNC_GPIO2);
 // PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO0_U, FUNC_GPIO0);
 
-/*The following definitions are copied from arduino.h*/
-#define LOW  0x0
-#define HIGH 0x1
-#define CHANGE 2
-#define FALLING 3
-#define RISING 4
 
-#define INPUT 0x0
-#define OUTPUT 0x1
-#define INPUT_PULLUP 0x2
-
-#define SERIAL  0x0
-#define DISPLAY 0x1
-
-#define LSBFIRST 0
-#define MSBFIRST 1
 
 
 
@@ -60,12 +46,6 @@
 #define PIN_14 14
 
 #define PIN_15 15
-
-#define INPUT 1
-#define OUTPUT 0
-
-#define HIGH 1
-#define LOW 0
 
 #define PORTA 0
 #define PA0 PIN_0

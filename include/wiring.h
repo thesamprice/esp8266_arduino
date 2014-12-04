@@ -1,6 +1,39 @@
 #ifndef WIRING_H
 #define WIRING_H
 
+enum WIRING_ERRORS{
+	WIRING_SUCCESS = 0,
+	INVALID_PIN  = -1,
+	INVALID_PORT = -2
+};
+/*The following definitions are copied from arduino.h*/
+#define LOW  (0x0)
+#define HIGH (0x1)
+#define CHANGE  (2)
+#define FALLING (3)
+#define RISING  (4)
+
+#define INPUT  (0x0)
+#define OUTPUT (0x1)
+#define INPUT_PULLUP (0x2)
+
+#ifndef true
+//#define true  (0x1)
+//#define false (0x0)
+#endif
+
+
+#define PI          (3.1415926535897932384626433832795)
+#define HALF_PI     (1.5707963267948966192313216916398)
+#define TWO_PI      (6.283185307179586476925286766559)
+#define DEG_TO_RAD  (0.017453292519943295769236907684886)
+#define RAD_TO_DEG (57.295779513082320876798154814105)
+
+#define SERIAL  (0x0)
+#define DISPLAY (0x1)
+
+#define LSBFIRST (0)
+#define MSBFIRST (1)
 
 /*!
 * @brief Pullup resistors are used in circuits to ensure that an input pin 
@@ -42,20 +75,29 @@ int digitalRead(int pin);
 * A digital I/O port is a group of 8 pins. By writing 0 to a port it will set individually 
 * each of the 8 pins to 0 (LOW). Possible values range from 0 to 255. It possible to read 
 * or write a value of a digital I/O port by using the portRead() and portWrite() methods.
+* @return
+*   @status
+*   @enum WIRING_ERRORS
 */
-void portMode(int port,int is_output);
+int portMode(int port,int is_output);
 
 /*!
 * @brief The portRead() method reads the value of the digital input port specified.
+* @return
+*   @status
+*   @enum WIRING_ERRORS
 */
 int portRead(int port);
 
 /*!
 * @brief The portWrite() method writes a value to the digital output port specified.
+* @return
+*   @status
+*   @enum WIRING_ERRORS
 */
-void portWrite(int port, int byte);
+int portWrite(int port, int byte);
 
-typedef void INT_FUNC();
+typedef void (*INT_FUNC)();
 
 /*!
 * @brief The interruptMode method sets the mode in which an external interrupt is generated. 
@@ -63,7 +105,7 @@ typedef void INT_FUNC();
 * LOW when a pin is low, CHANGE when the pin changes, RISING when the pin goes from low to high or 
 * FALLING when the pin goes from high to low.
 */
-int interruptMode(uint8_t interrupt,int mode);
+int interruptMode(unsigned char interrupt,int mode);
 
 /*!
 * @brief It is possible to generate and attend external interrupts on the Wiring hardware. 
@@ -78,7 +120,7 @@ int interruptMode(uint8_t interrupt,int mode);
 * in the interrupt routine.
 * @enum [HIGH,LOW, CHANGE, RISING, FALLING]
 */
-void attachInterrupt(uint8_t interrupt, INT_FUNC function, int mode);
+int attachInterrupt(unsigned char interrupt, INT_FUNC function, int mode);
 
 /*!
 * @brief It is possible to generate and attend external interrupts on the Wiring hardware. 
@@ -89,7 +131,7 @@ void attachInterrupt(uint8_t interrupt, INT_FUNC function, int mode);
 * also see the call to interrupts() in the example above enabling interrupts to allow the use of Serial 
 * in the interrupt routine.
 */
-void detachInterrupt(uint8_t interrupt);
+int detachInterrupt(unsigned char interrupt);
 
 /*!
 * @brief The noInterrupts() and interrupts() methods disable and enable interrupts, respectively, 
@@ -114,6 +156,15 @@ void interrupts();
 * Wiring board will not work again in the current program.
 */
 void noInterrupts();
+
+
+/*!
+* @brief Returns a pointer to an array of the prot pins for the specified prot.
+* null pointer is returned for invalid ports.
+* @NON_ARDUINO
+*/
+int* getPortPins(int port);
+
 
 
 #endif
