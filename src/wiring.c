@@ -4,6 +4,7 @@
 #include "gpio.h"
 #include "eagle_soc.h"
 #include "osapi.h"
+#include "user_interface.h"
 
 extern void ets_isr_attach(int intr, void *handler, void *arg);
 extern void ets_isr_mask(unsigned intr);
@@ -165,6 +166,9 @@ int interruptMode(unsigned char interrupt,int mode)
 		case LOW:
 			int_mode = GPIO_PIN_INTR_LOLEVEL;
 		break;
+		case DISABLED:
+			int_mode = GPIO_PIN_INTR_DISABLE;
+			break;
 		default:
 			return -1; /*TODO Error codes*/
 	}
@@ -219,4 +223,20 @@ void interrupts()
 void noInterrupts()
 {
 	ETS_GPIO_INTR_DISABLE();
+}
+
+unsigned long millis(void) {
+    return system_get_time()/1000L;
+}
+
+unsigned long micros(void) {
+    return system_get_time();
+}
+
+void delay(unsigned long ms) {
+	delayMicroseconds(ms*1000);
+}
+
+void delayMicroseconds(unsigned long us) {
+    os_delay_us(us);
 }

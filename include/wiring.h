@@ -12,10 +12,12 @@ enum WIRING_ERRORS{
 #define CHANGE  (2)
 #define FALLING (3)
 #define RISING  (4)
+#define DISABLED (5)
 
 #define INPUT  (0x0)
 #define OUTPUT (0x1)
 #define INPUT_PULLUP (0x2)
+
 
 #ifndef true
 //#define true  (0x1)
@@ -165,6 +167,26 @@ void noInterrupts();
 */
 int* getPortPins(int port);
 
+/*!
+* @brief Returns the number of milliseconds (thousandths of a second) since starting an application. This information is often used for timing sequences.
+*/
+unsigned long millis(void);
+
+/*!
+* @brief Returns the number of microseconds (millionths of a second) since starting an application. This information is often used for timing sequences.
+*/
+unsigned long micros(void);
+
+/*!
+* @brief Forces the program to stop running for a specified time. Delay time are specified in thousandths of a second. The function call delay(3000) will stop the program for three seconds. Alias of delayMilliseconds().
+*/
+void delay(unsigned long ms);
+void delayMilliseconds(unsigned long ms);
+
+/*!
+* @brief Forces the program to stop running for a specified time. Delay time are specified in thousandths of a second. The function call delay(3000) will stop the program for three seconds.
+*/
+void delayMicroseconds(unsigned long us);
 
 
 #endif
