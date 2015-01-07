@@ -1,10 +1,12 @@
 #include "BoardDefs.h"
-#include "wiring.h"
+
 #include "ets_sys.h"
 #include "gpio.h"
 #include "eagle_soc.h"
 #include "osapi.h"
 #include "user_interface.h"
+
+#include "wiring.h"
 
 extern void ets_isr_attach(int intr, void *handler, void *arg);
 extern void ets_isr_mask(unsigned intr);
@@ -12,6 +14,23 @@ extern void ets_isr_unmask(unsigned intr);
 
 static int port_a[] = {PA0,PA1,PA2,PA3,PA4,PA5,PA6,PA7};
 static int port_b[] = {PB0,PB1,PB2,PB3,PB4,PB5,PB6,PB7};
+
+int gpio_pin_register[16] = {PERIPHS_IO_MUX_GPIO0_U,
+                             PERIPHS_IO_MUX_U0TXD_U,
+                             PERIPHS_IO_MUX_GPIO2_U,
+                             PERIPHS_IO_MUX_U0RXD_U,
+                             PERIPHS_IO_MUX_GPIO4_U,
+                             PERIPHS_IO_MUX_GPIO5_U,
+                             PERIPHS_IO_MUX_SD_CLK_U,
+                             PERIPHS_IO_MUX_SD_DATA0_U,
+                             PERIPHS_IO_MUX_SD_DATA1_U,
+                             PERIPHS_IO_MUX_SD_DATA2_U,
+                             PERIPHS_IO_MUX_SD_DATA3_U,
+                             PERIPHS_IO_MUX_SD_CMD_U,
+                             PERIPHS_IO_MUX_MTDI_U,
+                             PERIPHS_IO_MUX_MTCK_U,
+                             PERIPHS_IO_MUX_MTMS_U,
+                             PERIPHS_IO_MUX_MTDO_U};
 
 void pullup(int inpin)
 {
@@ -24,21 +43,29 @@ void noPullup(int inpin)
 	PIN_PULLUP_DIS(inpin);
 }
 
-void pinMode(int pin, int is_output)
-{
-	// Set GPIO12 as input, then gpio_output_set (0, 0, 0, BIT12).
-	if(is_output == INPUT)
-	{
-		GPIO_DIS_OUTPUT(pin);
-	}
-	else{
-		GPIO_OUTPUT_SET(pin,0);
-	}
+
+void ICACHE_FLASH_ATTR pinMode(int pin, int is_output) {
+    if ((0x1 << pin) & 0b110101) {
+        PIN_FUNC_SELECT(gpio_pin_register[pin], 0);
+    } else {
+        PIN_FUNC_SELECT(gpio_pin_register[pin], 3);
+    }
+    PIN_PULLDWN_DIS(gpio_pin_register[pin]);
+    PIN_PULLUP_EN(gpio_pin_register[pin]);
+    if (is_output == OUTPUT) {
+        GPIO_REG_WRITE(GPIO_ENABLE_W1TS_ADDRESS, 1<<pin); // GPIO input
+    } else {
+        GPIO_REG_WRITE(GPIO_ENABLE_W1TC_ADDRESS, 1<<pin); // GPIO output
+
+    }
 }
 
-void digitalWrite(int outpin, int val)
-{
-	GPIO_OUTPUT_SET(outpin,val & 0x1);
+void ICACHE_FLASH_ATTR digitalWrite(int pin, int state) {
+    if (state) {
+        GPIO_REG_WRITE(GPIO_OUT_W1TS_ADDRESS, 1<<pin); // GPIO high
+    } else {
+        GPIO_REG_WRITE(GPIO_OUT_W1TC_ADDRESS, 1<<pin); // GPIO low
+    }
 }
 
 int digitalRead(int pin)
